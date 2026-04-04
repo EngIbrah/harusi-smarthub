@@ -1,15 +1,16 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { forwardRef } from "react";
+import { cloneElement, forwardRef, isValidElement } from "react";
 
 // ─── BUTTON ──────────────────────────────────────────────────
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "danger" | "outline";
   size?: "sm" | "md" | "lg";
   loading?: boolean;
+  asChild?: boolean;
 }
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = "primary", size = "md", loading, className, children, disabled, ...props }, ref) => {
+  ({ asChild = false, variant = "primary", size = "md", loading, className, children, disabled, ...props }, ref) => {
     const base = "inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
     const variants = {
       primary:   "bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30",
@@ -23,11 +24,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       md: "px-5 py-2.5 text-sm",
       lg: "px-7 py-3.5 text-base",
     };
+    const mergedClassName = cn(base, variants[variant], sizes[size], className, isValidElement(children) ? children.props.className : undefined);
+
+    if (asChild && isValidElement(children)) {
+      return cloneElement(children, {
+        ...props,
+        ref,
+        className: mergedClassName,
+        disabled: disabled || loading,
+      });
+    }
+
     return (
       <button
         ref={ref}
         disabled={disabled || loading}
-        className={cn(base, variants[variant], sizes[size], className)}
+        className={mergedClassName}
         {...props}
       >
         {loading && <Spinner size="sm" />}
@@ -191,7 +203,7 @@ export function StatCard({ label, value, icon, color = "amber", change }: StatCa
 }
 
 // ─── EMPTY STATE ─────────────────────────────────────────────
-interface EmptyProps { icon?: string; title: string; description?: string; action?: React.ReactNode; }
+interface EmptyProps { icon?: React.ReactNode; title: string; description?: string; action?: React.ReactNode; }
 export function Empty({ icon = "📭", title, description, action }: EmptyProps) {
   return (
     <div className="text-center py-16 px-6">
