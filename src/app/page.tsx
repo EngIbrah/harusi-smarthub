@@ -1,149 +1,192 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import { WEDDING_IMAGES } from "@/lib/utils";
+import { 
+  Sparkles, 
+  Store, 
+  Bot, 
+  ShieldCheck, 
+  BarChart3, 
+  ArrowRight, 
+  Gem,
+  MapPin
+} from "lucide-react";
 
 export default function HomePage() {
-  
   return (
-    <div className="min-h-screen bg-harusi-cream">
+    <div className="min-h-screen bg-brand-cloud selection:bg-brand-tanzanite/10">
       <Navbar />
 
-      {/* HERO */}
-      <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-harusi-darker">
-        {/* Background collage */}
-        <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 opacity-20">
+      {/* HERO SECTION */}
+      <section className="relative min-h-[95vh] flex items-center overflow-hidden bg-brand-ebony">
+        {/* Background collage with softer overlay */}
+        <div className="absolute inset-0 grid grid-cols-2 md:grid-cols-4 grid-rows-2 opacity-30">
           {WEDDING_IMAGES.slice(0, 8).map((src, i) => (
-            <div key={i} className="relative overflow-hidden">
-              <Image src={src} alt="" fill className="object-cover" sizes="25vw" />
+            <div key={i} className="relative overflow-hidden border-[0.5px] border-white/5">
+              <Image 
+                src={src} 
+                alt="" 
+                fill 
+                className="object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700" 
+                sizes="(max-width: 768px) 50vw, 25vw" 
+              />
             </div>
           ))}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-harusi-darker via-harusi-darker/95 to-harusi-darker" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-ebony/60 via-brand-ebony/90 to-brand-ebony" />
 
-        {/* Decorative rings */}
-        {[1,2,3,4,5].map((i) => (
-          <div key={i} className="absolute rounded-full border border-amber-500/10 pointer-events-none"
-            style={{ width: `${200 + i * 130}px`, height: `${200 + i * 130}px`, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
-          />
-        ))}
+        {/* Brand Accent: Decorative Tanzanite Rings */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none overflow-hidden">
+          {[1, 2, 3].map((i) => (
+            <div 
+              key={i} 
+              className="absolute rounded-full border border-brand-tanzanite/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              style={{ 
+                width: `${300 + i * 200}px`, 
+                height: `${300 + i * 200}px`,
+                animation: `pulseSoft ${3 + i}s ease-in-out infinite` 
+              }}
+            />
+          ))}
+        </div>
 
-        {/* Accent dots */}
-        <div className="absolute top-1/4 left-[15%] w-1.5 h-1.5 rounded-full bg-amber-400 opacity-60 animate-pulse-soft" />
-        <div className="absolute top-1/3 right-[20%] w-1 h-1 rounded-full bg-amber-300 opacity-80 animate-pulse-soft" style={{ animationDelay: "1s" }} />
-        <div className="absolute bottom-1/4 left-[25%] w-2 h-2 rounded-full bg-amber-500 opacity-30 animate-pulse-soft" style={{ animationDelay: "2s" }} />
-
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 text-center">
-          {/* Pill badge */}
-          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-5 py-2 mb-10 animate-fade-in">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span className="text-amber-300 text-xs font-semibold tracking-widest uppercase">Tanzania's #1 Wedding Platform</span>
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 pt-20 text-center">
+          {/* Refined Pill Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 mb-8 animate-fade-in">
+            <Gem className="w-3.5 h-3.5 text-brand-gold" />
+            <span className="text-white/80 text-[10px] font-semibold tracking-[0.2em] uppercase">
+              Tanzania's Premier Wedding Ecosystem
+            </span>
           </div>
 
-          <h1 className="font-serif leading-none mb-3 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            <span className="block text-6xl sm:text-8xl font-bold text-harusi-cream tracking-tight">Harusi</span>
-            <span className="block text-6xl sm:text-8xl font-light text-gradient-gold tracking-tight">SmartHub</span>
+          <h1 className="font-serif leading-[0.9] mb-6 animate-fade-up">
+            <span className="block text-5xl sm:text-7xl lg:text-9xl font-bold text-white tracking-tighter">
+              Harusi
+            </span>
+            <span className="block text-5xl sm:text-7xl lg:text-9xl font-light text-gradient-gold tracking-tighter">
+              SmartHub
+            </span>
           </h1>
 
-          <p className="text-stone-400 text-lg sm:text-xl font-light max-w-2xl mx-auto mt-8 mb-12 leading-relaxed animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            Plan your perfect wedding in Tanzania with AI-guided budgeting, verified local vendors, and real-time cost tracking — all beautifully organised.
+          <p className="text-white/60 text-base sm:text-lg lg:text-xl font-light max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up [animation-delay:200ms]">
+            Experience the art of effortless planning. From AI-guided budgeting to a curated marketplace of verified Tanzanian vendors.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-up [animation-delay:400ms]">
             <Link href="/register?role=couple"
-              className="group px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white rounded-2xl font-bold text-base shadow-2xl shadow-amber-500/25 hover:shadow-amber-500/40 transition-all duration-300 hover:-translate-y-0.5">
-              <span className="mr-2">✨</span> Start Planning Free
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-brand-tanzanite hover:bg-brand-tanzanite/90 text-white rounded-2xl font-semibold transition-all hover:-translate-y-1 shadow-xl shadow-brand-tanzanite/20">
+              <Sparkles className="w-5 h-5" />
+              Start Planning Free
             </Link>
             <Link href="/register?role=vendor"
-              className="px-8 py-4 border border-amber-500/30 text-amber-300 hover:border-amber-500/60 hover:bg-amber-500/5 rounded-2xl font-bold text-base transition-all duration-300">
-              <span className="mr-2">🏪</span> Join as Vendor
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/20 text-white rounded-2xl font-semibold backdrop-blur-sm transition-all">
+              <Store className="w-5 h-5" />
+              List Your Service
             </Link>
           </div>
         </div>
 
-        {/* Stats bar */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-white/5 bg-white/[0.02]">
-          <div className="max-w-4xl mx-auto flex flex-wrap justify-center">
+        {/* Stats bar - Now more responsive */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-black/20 backdrop-blur-md hidden sm:block">
+          <div className="max-w-6xl mx-auto grid grid-cols-4 divide-x divide-white/10">
             {[
               ["500+", "Verified Vendors"],
               ["2,400+", "Happy Couples"],
-              ["4.9★", "Avg Rating"],
-              ["8 Cities", "Across Tanzania"],
+              ["4.9★", "User Rating"],
+              ["8 Cities", "In Tanzania"],
             ].map(([val, lbl]) => (
-              <div key={lbl} className="px-8 py-5 text-center border-r border-white/5 last:border-none">
-                <div className="font-serif text-xl font-bold text-amber-400 tabular-nums">{val}</div>
-                <div className="text-xs text-stone-500 mt-1 tracking-wide">{lbl}</div>
+              <div key={lbl} className="py-6 text-center">
+                <div className="font-serif text-2xl font-bold text-brand-gold">{val}</div>
+                <div className="text-[10px] text-white/40 uppercase tracking-widest mt-1">{lbl}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FEATURES */}
+      {/* FEATURES - "Everything you need" */}
       <section className="py-24 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="font-serif text-4xl font-semibold text-harusi-dark mb-4">Everything you need</h2>
-          <p className="text-harusi-muted max-w-xl mx-auto">From budget to big day — one platform handles it all, built specifically for Tanzanian weddings.</p>
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-brand-ebony mb-4">
+              Designed for the <span className="italic font-light">modern couple</span>
+            </h2>
+            <p className="text-brand-ebony/60 text-lg leading-relaxed">
+              Tailored specifically for Tanzanian weddings, our platform bridges the gap between tradition and digital efficiency.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-brand-tanzanite font-semibold group cursor-pointer">
+            Explore all features <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { icon: "🤖", title: "AI Budget Planning", desc: "Enter your budget and get a smart breakdown with vendor recommendations tailored to your guest count." },
-            { icon: "🛍️", title: "Verified Marketplace", desc: "Browse 500+ local vendors with real ratings, verified profiles, and transparent pricing." },
-            { icon: "📊", title: "Real-Time Tracking", desc: "Watch your budget update live as you add vendors. Instant alerts before you overspend." },
-            { icon: "🏆", title: "Vendor Trust Profile", desc: "Build credibility through completed bookings — unlocking financial inclusion opportunities." },
-          ].map((f) => (
-            <div key={f.title} className="p-8 bg-white rounded-2xl border border-stone-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-              <div className="text-3xl mb-5">{f.icon}</div>
-              <h3 className="font-serif text-lg font-bold text-harusi-dark mb-3">{f.title}</h3>
-              <p className="text-sm text-harusi-muted leading-relaxed">{f.desc}</p>
+            { icon: <Bot className="text-brand-tanzanite" />, title: "AI Budgeter", desc: "Get a customized financial breakdown based on guest count and local market rates." },
+            { icon: <ShieldCheck className="text-brand-gold" />, title: "Verified Hub", desc: "Every vendor is vetted by our team to ensure reliability and quality for your big day." },
+            { icon: <BarChart3 className="text-brand-sage" />, title: "Cost Tracking", desc: "Monitor payments and deposits in real-time. Avoid the 'Harusi debt' trap." },
+            { icon: <MapPin className="text-brand-hibiscus" />, title: "Local Logistics", desc: "Find service providers in your specific city, from Mwanza to Dar es Salaam." },
+          ].map((f, i) => (
+            <div key={i} className="harusi-card p-8 group">
+              <div className="w-12 h-12 rounded-xl bg-stone-50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                {f.icon}
+              </div>
+              <h3 className="text-xl font-bold text-brand-ebony mb-3">{f.title}</h3>
+              <p className="text-sm text-brand-ebony/60 leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* WEDDING GALLERY */}
-      <section className="pb-24 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="font-serif text-4xl font-semibold text-harusi-dark mb-4">Beautiful weddings planned here</h2>
-          <p className="text-harusi-muted">Join thousands of couples who planned their perfect day with Harusi SmartHub.</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {WEDDING_IMAGES.map((src, i) => (
-            <div key={i} className={`relative rounded-2xl overflow-hidden ${i === 0 || i === 5 ? "row-span-2" : ""}`}
-              style={{ height: i === 0 || i === 5 ? "360px" : "170px" }}>
-              <Image src={src} alt="Wedding" fill className="object-cover hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 50vw, 25vw" />
+      {/* IMAGE GRID - "Boutique Gallery" */}
+      <section className="pb-32 px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-12 gap-4 h-[600px] md:h-[700px]">
+          <div className="col-span-12 md:col-span-8 relative rounded-3xl overflow-hidden group">
+            <Image src={WEDDING_IMAGES[0]} alt="" fill className="object-cover group-hover:scale-105 transition-all duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute bottom-8 left-8">
+              <span className="text-white/60 text-xs uppercase tracking-widest mb-2 block">Luxury Decor</span>
+              <h4 className="text-white text-2xl font-serif">Arusha Botanical Gardens</h4>
             </div>
-          ))}
+          </div>
+          <div className="hidden md:flex md:col-span-4 flex-col gap-4">
+            <div className="relative h-1/2 rounded-3xl overflow-hidden group">
+              <Image src={WEDDING_IMAGES[1]} alt="" fill className="object-cover group-hover:scale-105 transition-all duration-700" />
+            </div>
+            <div className="relative h-1/2 rounded-3xl overflow-hidden group">
+              <Image src={WEDDING_IMAGES[2]} alt="" fill className="object-cover group-hover:scale-105 transition-all duration-700" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-harusi-dark py-24 px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 bg-grain" />
-        <div className="relative z-10 max-w-2xl mx-auto">
-          <div className="text-5xl mb-6">💍</div>
-          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-harusi-cream mb-6">
-            Ready to plan your <span className="text-gradient-gold">perfect wedding?</span>
+      {/* FINAL CTA */}
+      <section className="bg-brand-tanzanite py-24 px-6 text-center relative overflow-hidden mx-6 mb-12 rounded-[3rem]">
+        <div className="absolute inset-0 opacity-10 bg-grain" />
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <h2 className="text-4xl sm:text-6xl font-bold text-white mb-8">
+            Ready to plan your <span className="text-brand-gold italic">perfect</span> day?
           </h2>
-          <p className="text-stone-400 mb-10 text-lg">Start for free. No credit card required.</p>
           <Link href="/register"
-            className="inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-amber-500/30 transition-all hover:-translate-y-0.5">
-            Get Started Today →
+            className="inline-flex items-center gap-3 px-10 py-5 bg-white text-brand-tanzanite hover:bg-brand-gold hover:text-white rounded-2xl font-bold text-lg transition-all hover:-translate-y-1 shadow-2xl">
+            Start Free Consultation <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-harusi-darker border-t border-white/5 py-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center text-sm">💍</div>
-            <span className="font-serif text-lg font-bold text-stone-300">Harusi SmartHub</span>
+      <footer className="bg-white border-t border-stone-200 py-16 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-tanzanite flex items-center justify-center text-white font-serif font-bold text-xl">H</div>
+            <span className="font-serif text-2xl font-bold text-brand-ebony">Harusi SmartHub</span>
           </div>
-          <p className="text-stone-500 text-sm">© {new Date().getFullYear()} Harusi SmartHub. Built for Tanzania 🇹🇿</p>
-          <div className="flex gap-6">
+          <p className="text-brand-ebony/40 text-sm">© {new Date().getFullYear()} Harusi SmartHub. Proudly Tanzanian. 🇹🇿</p>
+          <div className="flex gap-8">
             {["Privacy", "Terms", "Contact"].map((l) => (
-              <a key={l} href="#" className="text-stone-500 hover:text-stone-300 text-sm transition-colors">{l}</a>
+              <a key={l} href="#" className="text-brand-ebony/60 hover:text-brand-tanzanite text-sm font-medium transition-colors">{l}</a>
             ))}
           </div>
         </div>
