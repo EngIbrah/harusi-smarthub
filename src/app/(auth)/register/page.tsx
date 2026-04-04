@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -6,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Users, Store, ArrowRight, CheckCircle2 } from "lucide-react";
 import type { UserRole } from "@/types";
 
 export default function RegisterPage() {
@@ -15,70 +17,166 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  
   const router = useRouter();
   const supabase = createClient();
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 8) { toast.error("Password must be at least 8 characters"); return; }
+    if (password.length < 8) { 
+      toast.error("Password must be at least 8 characters"); 
+      return; 
+    }
+    
     setLoading(true);
     const { error } = await supabase.auth.signUp({
-      email, password,
-      options: { data: { full_name: fullName, role } },
+      email,
+      password,
+      options: { 
+        data: { 
+          full_name: fullName, 
+          role: role 
+        } 
+      },
     });
-    if (error) { toast.error(error.message); setLoading(false); return; }
-    toast.success("Account created! Signing you in…");
+
+    if (error) { 
+      toast.error(error.message); 
+      setLoading(false); 
+      return; 
+    }
+
+    toast.success("Account created! Welcome to Harusi SmartHub.");
+    
+    // Smooth redirect based on role
     setTimeout(() => {
-      if (role === "vendor") router.push("/vendor/dashboard");
-      else router.push("/dashboard");
-    }, 1200);
+      router.push(role === "vendor" ? "/vendor/dashboard" : "/dashboard");
+      router.refresh();
+    }, 1500);
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-bold text-harusi-dark mb-2">Create your account</h1>
-        <p className="text-harusi-muted text-sm">Join thousands of Tanzanians planning beautiful weddings.</p>
-      </div>
-
-      {/* Role selector */}
-      <div className="grid grid-cols-2 gap-3 mb-8">
-        {([
-          { role: "couple", icon: "💍", title: "I'm a Couple", desc: "Plan & book my wedding" },
-          { role: "vendor", icon: "🏪", title: "I'm a Vendor", desc: "List my services" },
-        ] as const).map((opt) => (
-          <button key={opt.role} type="button" onClick={() => setRole(opt.role)}
-            className={cn(
-              "p-4 rounded-2xl border-2 text-left transition-all duration-200",
-              role === opt.role
-                ? "border-amber-400 bg-amber-50 shadow-md shadow-amber-100"
-                : "border-stone-200 hover:border-stone-300 bg-white"
-            )}>
-            <div className="text-2xl mb-2">{opt.icon}</div>
-            <div className={cn("font-semibold text-sm", role === opt.role ? "text-amber-700" : "text-harusi-dark")}>{opt.title}</div>
-            <div className="text-xs text-harusi-muted mt-0.5">{opt.desc}</div>
-          </button>
-        ))}
-      </div>
-
-      <form onSubmit={handleRegister} className="space-y-4">
-        <Input label="Full name" type="text" placeholder="Amara Mwangi" value={fullName} onChange={e => setFullName(e.target.value)} required />
-        <Input label="Email address" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
-        <Input label="Password" type="password" placeholder="Min. 8 characters" value={password} onChange={e => setPassword(e.target.value)} required />
-
-        <p className="text-xs text-harusi-muted">
-          By creating an account, you agree to our{" "}
-          <a href="#" className="text-amber-600 hover:underline">Terms of Service</a> and{" "}
-          <a href="#" className="text-amber-600 hover:underline">Privacy Policy</a>.
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="mb-10 text-center sm:text-left">
+        <h1 className="font-serif text-4xl font-bold text-brand-ebony mb-3 tracking-tight">
+          Begin your journey
+        </h1>
+        <p className="text-brand-ebony/60 text-sm leading-relaxed max-w-[320px]">
+          Join the community of Tanzanians celebrating love with smarter planning.
         </p>
-        <Button type="submit" loading={loading} className="w-full" size="lg">
-          {role === "vendor" ? "Create Vendor Account" : "Start Planning Free"}
+      </div>
+
+      {/* ROLE SELECTOR */}
+      <div className="grid grid-cols-2 gap-4 mb-10">
+        {( [
+          { role: "couple", icon: Users, title: "Couple", desc: "Plan & Book" },
+          { role: "vendor", icon: Store, title: "Vendor", desc: "Grow Business" },
+        ] as const).map((opt) => {
+          const Icon = opt.icon;
+          const isActive = role === opt.role;
+          return (
+            <button
+              key={opt.role}
+              type="button"
+              onClick={() => setRole(opt.role)}
+              className={cn(
+                "relative group p-5 rounded-2xl border-2 text-left transition-all duration-300 overflow-hidden",
+                isActive
+                  ? "border-brand-tanzanite bg-white shadow-xl shadow-brand-tanzanite/10"
+                  : "border-brand-ebony/5 bg-white/50 hover:border-brand-ebony/20"
+              )}
+            >
+              {isActive && (
+                <div className="absolute top-2 right-2">
+                  <CheckCircle2 className="w-4 h-4 text-brand-tanzanite" />
+                </div>
+              )}
+              <div className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors",
+                isActive ? "bg-brand-tanzanite text-white" : "bg-brand-ebony/5 text-brand-ebony/40 group-hover:text-brand-ebony"
+              )}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div className={cn("font-bold text-sm", isActive ? "text-brand-ebony" : "text-brand-ebony/60")}>
+                {opt.title}
+              </div>
+              <div className="text-[10px] text-brand-ebony/40 uppercase tracking-widest font-bold mt-1">
+                {opt.desc}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* REGISTRATION FORM */}
+      <form onSubmit={handleRegister} className="space-y-5">
+        <div className="space-y-4">
+          <Input 
+            label="Full Name" 
+            type="text" 
+            placeholder="e.g. Juma Kapuya" 
+            value={fullName} 
+            onChange={e => setFullName(e.target.value)} 
+            required 
+            className="bg-white/50 focus:bg-white"
+          />
+          <Input 
+            label="Email Address" 
+            type="email" 
+            placeholder="juma@example.com" 
+            value={email} 
+            onChange={e => setEmail(e.target.value)} 
+            required 
+            className="bg-white/50 focus:bg-white"
+          />
+          <Input 
+            label="Create Password" 
+            type="password" 
+            placeholder="Min. 8 characters" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            required 
+            className="bg-white/50 focus:bg-white"
+          />
+        </div>
+
+        <div className="pt-2">
+          <p className="text-[11px] text-brand-ebony/50 leading-relaxed">
+            By creating an account, you agree to our{" "}
+            <Link href="/terms" className="text-brand-tanzanite font-bold hover:underline">Terms</Link> and{" "}
+            <Link href="/privacy" className="text-brand-tanzanite font-bold hover:underline">Privacy Policy</Link>.
+          </p>
+        </div>
+
+        <Button 
+          type="submit" 
+          disabled={loading} 
+          className={cn(
+            "w-full h-14 rounded-2xl text-base font-bold shadow-lg transition-all",
+            role === "vendor" 
+              ? "bg-brand-ebony text-white hover:bg-black" 
+              : "bg-brand-tanzanite text-white hover:bg-brand-tanzanite/90 shadow-brand-tanzanite/20"
+          )}
+        >
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Creating account...
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2">
+              {role === "vendor" ? "Join as Vendor" : "Start Planning My Wedding"}
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          )}
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-harusi-muted">
+      <p className="mt-8 text-center text-sm text-brand-ebony/60">
         Already have an account?{" "}
-        <Link href="/login" className="text-amber-600 hover:text-amber-700 font-semibold">Sign in</Link>
+        <Link href="/login" className="text-brand-tanzanite hover:text-brand-tanzanite/80 font-bold transition-colors">
+          Sign in here
+        </Link>
       </p>
     </div>
   );

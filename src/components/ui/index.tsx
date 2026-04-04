@@ -166,7 +166,7 @@ export function Spinner({ size = "md", className }: { size?: "sm"|"md"|"lg"; cla
 }
 
 // ─── STAT CARD ───────────────────────────────────────────────
-interface StatCardProps { label: string; value: string | number; icon: string; color?: string; change?: string; }
+interface StatCardProps { label: string; value: string | number; icon: React.ReactNode; color?: string; change?: string; }
 export function StatCard({ label, value, icon, color = "amber", change }: StatCardProps) {
   const colors: Record<string, string> = {
     amber:  "border-t-amber-400",
