@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
@@ -12,19 +12,17 @@ import type { Vendor, Category, BudgetAllocation } from "@/types";
 
 const CATEGORIES_ALL = "All Vendors";
 
-export default function PlannerPage() {
+function PlannerContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createClient();
 
-  // Core State
+  // --- ALL YOUR ORIGINAL STATE ---
   const [mode, setMode] = useState<"ai" | "manual">((searchParams.get("mode") as "ai" | "manual") || "ai");
   const [budget, setBudget] = useState("10000000"); 
   const [guestCount, setGuestCount] = useState("200");
   const [weddingDate, setWeddingDate] = useState("");
   const [priority, setPriority] = useState("balanced");
-  
-  // AI State
   const [allocation, setAllocation] = useState<BudgetAllocation | null>(null);
   const [aiInsight, setAiInsight] = useState<{
     market_analysis: string;
@@ -33,8 +31,6 @@ export default function PlannerPage() {
     recommended_ids: string[];
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-
-  // Vendor Data State
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState(CATEGORIES_ALL);
@@ -43,7 +39,7 @@ export default function PlannerPage() {
   const [savingPlan, setSavingPlan] = useState(false);
   const [planId, setPlanId] = useState<string | null>(null);
 
-  // Derived Values
+  // --- DERIVED VALUES ---
   const totalSelected = selected.reduce((s, v) => s + v.base_price, 0);
   const budgetNum = parseFloat(budget) || 0;
   const remaining = budgetNum - totalSelected;
@@ -92,13 +88,7 @@ export default function PlannerPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed");
-
-      setAiInsight({
-        recommended_ids: data.recommended_ids || [],
-        market_analysis: data.market_analysis || "Analysis pending...",
-        savings_insight: data.savings_insight || "0 TSh",
-        strategy_tip: data.strategy_tip || "No tips available yet."
-      });
+      setAiInsight(data);
       if (data.allocation) setAllocation(data.allocation);
       toast.success("AI Strategy Generated!");
     } catch (err: any) { toast.error(err.message); } finally { setIsGenerating(false); }
@@ -129,7 +119,7 @@ export default function PlannerPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-700">
       
-      {/* HEADER */}
+      {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-brand-ebony/5 pb-8">
         <div>
           <Badge variant="default" className="mb-2 bg-transparent border border-brand-gold/30 text-brand-gold font-bold tracking-widest text-[10px] uppercase">
@@ -153,7 +143,7 @@ export default function PlannerPage() {
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-8 items-start">
         <div className="space-y-8 min-w-0">
           
-          {/* INPUT CARD */}
+          {/* PARAMETERS CARD */}
           <Card className="p-6 border-none shadow-xl bg-white/80 backdrop-blur-md">
              <h3 className="font-serif text-xl font-bold text-brand-ebony mb-6">Planning Parameters</h3>
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -168,194 +158,119 @@ export default function PlannerPage() {
                 <div className="space-y-2 lg:col-span-2">
                    <label className="text-[10px] font-bold text-brand-ebony/40 uppercase tracking-widest px-1">Primary Priority</label>
                    <div className="flex gap-2">
-                     {["balanced", "photography", "catering", "decor"].map(p => (
-                       <button key={p} onClick={() => setPriority(p)} className={cn("flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-tighter border transition-all", 
-                        priority === p ? "bg-brand-ebony text-white" : "bg-brand-cloud text-brand-ebony/40 border-transparent")}>
-                         {p}
-                       </button>
+                     {["balanced", "premium", "budget"].map((p) => (
+                        <button key={p} onClick={() => setPriority(p)} className={cn("flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all", priority === p ? "bg-brand-ebony text-white border-brand-ebony" : "bg-white text-brand-ebony/40 border-brand-ebony/5 hover:border-brand-ebony/20")}>
+                           {p}
+                        </button>
                      ))}
                    </div>
                 </div>
              </div>
              {mode === "ai" && (
-               <Button onClick={handleGenerateAIPlan} loading={isGenerating} disabled={!budgetNum} className="mt-6 w-full sm:w-auto px-8 bg-brand-ebony text-white rounded-xl font-bold h-12">
-                 <Sparkles className="w-4 h-4 mr-2 text-brand-gold" /> Optimize with AI
+               <Button onClick={handleGenerateAIPlan} disabled={isGenerating} className="w-full mt-8 h-14 bg-brand-tanzanite hover:bg-brand-tanzanite/90 rounded-2xl shadow-lg shadow-brand-tanzanite/20">
+                 {isGenerating ? <Spinner className="mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                 Generate AI Allocation
                </Button>
              )}
           </Card>
 
-          {/* IMPROVED AI INSIGHT PANEL */}
-          {aiInsight && (
-            <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-700">
-               <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-brand-gold fill-brand-gold" />
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-brand-ebony/60">Market Intelligence Report</h3>
-               </div>
-               
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* MAIN ANALYSIS */}
-                  <Card className="md:col-span-2 p-6 bg-brand-ebony text-white border-none shadow-xl relative overflow-hidden flex flex-col justify-center min-h-[140px]">
-                     <Quote className="absolute -top-2 -left-2 w-16 h-16 text-white/5" />
-                     <p className="text-lg font-serif italic leading-relaxed relative z-10">"{aiInsight.market_analysis}"</p>
-                  </Card>
+          {/* CATEGORY TABS */}
+          <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+            <button
+              onClick={() => setActiveCategory(CATEGORIES_ALL)}
+              className={cn("px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border",
+                activeCategory === CATEGORIES_ALL ? "bg-brand-ebony text-white border-brand-ebony" : "bg-white text-brand-ebony/40 border-brand-ebony/5")}
+            >
+              All Vendors
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.name)}
+                className={cn("px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border",
+                  activeCategory === cat.name ? "bg-brand-ebony text-white border-brand-ebony" : "bg-white text-brand-ebony/40 border-brand-ebony/5")}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
 
-                  {/* SAVINGS CARD */}
-                  <Card className="p-6 bg-brand-gold/10 border-2 border-dashed border-brand-gold/30 flex flex-col items-center justify-center text-center">
-                     <TrendingDown className="w-6 h-6 text-brand-gold mb-2" />
-                     <span className="text-[9px] font-black uppercase text-brand-gold/60 tracking-widest">Potential Savings</span>
-                     <p className="text-sm font-bold text-brand-ebony mt-1">{aiInsight.savings_insight}</p>
-                  </Card>
-
-                  {/* STRATEGY TIP CARD */}
-                  <Card className="md:col-span-3 p-5 bg-brand-cloud border-none flex items-start gap-4">
-                     <div className="w-10 h-10 rounded-full bg-brand-gold/20 flex items-center justify-center shrink-0">
-                        <Star className="w-5 h-5 text-brand-gold" />
-                     </div>
-                     <div>
-                        <h4 className="text-[10px] font-black uppercase text-brand-ebony tracking-widest mb-1">Harusi Strategy Tip</h4>
-                        <p className="text-xs text-brand-ebony/60 leading-relaxed">{aiInsight.strategy_tip}</p>
-                     </div>
-                  </Card>
-               </div>
-            </div>
-          )}
-
-          {/* ALLOCATION BARS */}
-          {allocation && (
-            <Card className="p-8 border-none bg-brand-cloud/50 shadow-inner rounded-3xl">
-              <h3 className="font-serif text-xl font-bold mb-8 text-brand-ebony">Suggested Fund Distribution</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8">
-                {Object.entries(allocation).map(([key, amt]) => {
-                  const pctOfTotal = budgetNum > 0 ? Math.round((Number(amt) / budgetNum) * 100) : 0;
-                  return (
-                    <div key={key} className="space-y-3">
-                      <div className="flex justify-between items-end">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-brand-ebony/50">{key.replace('_', ' ')}</span>
-                        <span className="text-xs font-bold text-brand-ebony">{formatTSHShort(Number(amt))}</span>
-                      </div>
-                      <div className="h-2 bg-brand-ebony/5 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full bg-brand-gold transition-all duration-1000 ease-out" style={{ width: `${pctOfTotal}%` }} />
+          {/* VENDOR GRID (THE PART YOU WERE MISSING) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {loadingVendors ? (
+              Array(4).fill(0).map((_, i) => <Card key={i} className="h-64 animate-pulse bg-brand-cloud border-none"><div /></Card>)
+            ) : (
+              filteredVendors.map(vendor => {
+                const isSelected = selected.some(v => v.id === vendor.id);
+                return (
+                  <Card key={vendor.id} className={cn("group overflow-hidden border-none shadow-md transition-all cursor-pointer", isSelected ? "ring-2 ring-brand-tanzanite bg-brand-tanzanite/5" : "hover:shadow-xl bg-white")}>
+                    <div className="relative h-48" onClick={() => toggleVendor(vendor)}>
+                      <Image 
+                        src={vendor.cover_image || vendor.images?.[0] || VENDOR_PLACEHOLDER_IMAGES[0]} 
+                        alt={vendor.business_name} 
+                        fill 
+                        className="object-cover transition-transform group-hover:scale-110" 
+                      />
+                      <div className="absolute top-3 right-3">
+                         <Badge className={isSelected ? "bg-brand-tanzanite" : "bg-white/80 backdrop-blur text-brand-ebony"}>
+                           {isSelected ? "Selected" : "Add to Plan"}
+                         </Badge>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </Card>
-          )}
-
-          {/* VENDORS GRID */}
-          <div className="space-y-6 pt-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif text-2xl font-bold text-brand-ebony flex items-center gap-2">
-                <ShoppingBag className="w-6 h-6 text-brand-gold" /> Recommended Team
-              </h3>
-            </div>
-
-            <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-              {[CATEGORIES_ALL, ...categories.map(c => c.name)].map(cat => (
-                <button key={cat} onClick={() => setActiveCategory(cat)}
-                  className={cn("px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap",
-                    activeCategory === cat ? "bg-brand-ebony border-brand-ebony text-white shadow-lg" : "border-brand-ebony/10 text-brand-ebony/40 hover:border-brand-gold")}>
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {loadingVendors ? <Spinner size="lg" className="mx-auto block mt-10" /> : (
-              <div className="grid gap-6">
-                {filteredVendors.map(v => {
-                  const isSelected = !!selected.find(sel => sel.id === v.id);
-                  const isAiRecommended = aiInsight?.recommended_ids?.includes(v.id);
-                  
-                  return (
-                    <Card key={v.id} className={cn("group overflow-hidden border-2 transition-all p-0 relative rounded-3xl", 
-                      isSelected ? "border-brand-gold shadow-2xl scale-[1.01]" : "border-transparent bg-white shadow-sm hover:shadow-md")}>
-                      
-                      {isAiRecommended && (
-                        <div className="absolute top-4 left-4 z-20">
-                          <Badge className="bg-brand-gold text-brand-ebony border-none text-[8px] font-black tracking-widest px-3 py-1">
-                            <Sparkles className="w-2 h-2 mr-1 inline" /> GEMINI CHOICE
-                          </Badge>
-                        </div>
-                      )}
-
-                      <div className="flex flex-col sm:flex-row min-h-[200px]">
-                        <div className="relative w-full sm:w-64 overflow-hidden">
-                          <Image 
-                            src={v.cover_image || VENDOR_PLACEHOLDER_IMAGES[v.category?.slug || 'venue']} 
-                            alt={v.business_name} fill 
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                            sizes="(max-width: 768px) 100vw, 256px"
-                          />
-                        </div>
-                        <div className="p-8 flex-1 flex flex-col justify-between">
-                          <div>
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="font-bold text-xl text-brand-ebony">{v.business_name}</h4>
-                              <p className="text-lg font-serif font-bold text-brand-gold">{formatTSHShort(v.base_price)}</p>
-                            </div>
-                            <div className="flex items-center gap-4 mb-4">
-                              <StarRating rating={v.rating_avg} size="sm" />
-                              <span className="text-[10px] font-bold text-brand-ebony/30 uppercase tracking-widest">📍 {v.location}</span>
-                            </div>
-                            <p className="text-xs text-brand-ebony/50 leading-relaxed line-clamp-2">{v.description}</p>
-                          </div>
-                          
-                          <div className="flex items-center justify-end mt-6">
-                            <button onClick={() => toggleVendor(v)} className={cn("px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all", 
-                              isSelected ? "bg-brand-ebony text-white" : "bg-brand-cloud text-brand-ebony hover:bg-brand-gold hover:text-white")}>
-                              {isSelected ? "✓ Selected" : "+ Add to Plan"}
-                            </button>
-                          </div>
+                    <div className="p-5" onClick={() => toggleVendor(vendor)}>
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-bold text-brand-ebony group-hover:text-brand-tanzanite transition-colors">{vendor.business_name}</h4>
+                        <div className="flex items-center text-brand-gold">
+                           <Star className="w-3 h-3 fill-current" />
+                           <span className="text-xs font-bold ml-1">{vendor.rating_avg}</span>
                         </div>
                       </div>
-                    </Card>
-                  );
-                })}
-              </div>
+                      <p className="text-xs text-brand-ebony/60 font-bold mb-4">{formatTSHShort(vendor.base_price)} base</p>
+                    </div>
+                  </Card>
+                );
+              })
             )}
           </div>
         </div>
 
         {/* SIDEBAR SUMMARY */}
-        <div className="relative">
-          <div className="xl:sticky xl:top-24 space-y-6">
-            <Card className="p-8 border-none bg-brand-ebony text-white shadow-2xl overflow-hidden rounded-[2.5rem]">
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-gold/10 blur-3xl rounded-full" />
-              <h3 className="font-serif text-2xl font-bold mb-8">Live Summary</h3>
-              
-              <div className="space-y-4 mb-10">
-                <div className="flex justify-between p-5 bg-white/5 rounded-3xl border border-white/5">
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Total Selected</span>
-                  <span className="font-serif font-bold text-brand-gold text-lg">{formatTSHShort(totalSelected)}</span>
-                </div>
-                <div className={cn("flex justify-between p-5 rounded-3xl border", isOver ? "bg-red-500/10 border-red-500/20" : "bg-emerald-500/10 border-emerald-500/20")}>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{remaining < 0 ? "Deficit" : "Balance"}</span>
-                  <span className={cn("font-serif font-bold text-lg", isOver ? "text-red-400" : "text-emerald-400")}>{formatTSHShort(Math.abs(remaining))}</span>
-                </div>
+        <aside className="space-y-6">
+           <Card className="p-6 bg-brand-ebony text-white rounded-[32px]">
+              <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/40 mb-6">Investment Summary</h4>
+              <div className="space-y-4">
+                 <div className="flex justify-between items-end">
+                    <span className="text-white/60 text-sm">Spent</span>
+                    <span className="text-2xl font-serif font-bold">{formatTSHShort(totalSelected)}</span>
+                 </div>
+                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className={cn("h-full transition-all duration-1000", isOver ? "bg-red-500" : "bg-brand-gold")} style={{ width: `${pct}%` }} />
+                 </div>
+                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                    <span className={isOver ? "text-red-400" : "text-brand-gold"}>{pct}% Utilized</span>
+                    <span className="text-white/40">{formatTSHShort(remaining)} Remaining</span>
+                 </div>
               </div>
-
-              <div className="space-y-3 mb-10">
-                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest px-1">
-                  <span className="text-white/40">Budget Utilization</span>
-                  <span className={isOver ? "text-red-400" : "text-brand-gold"}>{pct}%</span>
-                </div>
-                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className={cn("h-full transition-all duration-1000 ease-in-out", isOver ? "bg-red-500" : "bg-brand-gold")} style={{ width: `${pct}%` }} />
-                </div>
-              </div>
-
-              <Button onClick={savePlan} loading={savingPlan} className="w-full py-8 bg-brand-gold text-brand-ebony font-black uppercase tracking-widest rounded-3xl hover:scale-[1.02] transition-transform shadow-xl shadow-brand-gold/5 border-none">
-                Synchronize Plan
+              <Button onClick={savePlan} disabled={savingPlan} className="w-full mt-8 bg-white text-brand-ebony hover:bg-white/90 h-14 rounded-2xl font-bold">
+                 {savingPlan ? "Syncing..." : "Sync Plan to Cloud"}
               </Button>
-              
-              <p className="text-[9px] text-center mt-6 text-white/20 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-                <Info className="w-3 h-3" /> Auto-saved to Cloud
-              </p>
-            </Card>
-          </div>
-        </div>
+           </Card>
+        </aside>
       </div>
     </div>
+  );
+}
+
+// 2. THE EXPORT WITH SUSPENSE (REQUIRED BY VERCEL)
+export default function PlannerPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Spinner size="lg" />
+        <p className="text-brand-ebony/40 font-medium tracking-widest uppercase text-[10px]">Initializing Planner...</p>
+      </div>
+    }>
+      <PlannerContent />
+    </Suspense>
   );
 }

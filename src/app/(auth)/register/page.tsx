@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react"; // Added Suspense
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import { Users, Store, ArrowRight, CheckCircle2 } from "lucide-react";
 import type { UserRole } from "@/types";
 
-export default function RegisterPage() {
+// 1. Move your logic into this internal component
+function RegisterForm() {
   const searchParams = useSearchParams();
   const [role, setRole] = useState<UserRole>((searchParams.get("role") as UserRole) || "couple");
   const [fullName, setFullName] = useState("");
@@ -48,7 +49,6 @@ export default function RegisterPage() {
 
     toast.success("Account created! Welcome to Harusi SmartHub.");
     
-    // Smooth redirect based on role
     setTimeout(() => {
       router.push(role === "vendor" ? "/vendor/dashboard" : "/dashboard");
       router.refresh();
@@ -179,5 +179,14 @@ export default function RegisterPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+// 2. Export the page wrapped in Suspense
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div>Loading form...</div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }
