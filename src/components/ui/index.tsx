@@ -140,7 +140,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 Select.displayName = "Select";
 
 // ─── BADGE ───────────────────────────────────────────────────
-interface BadgeProps { variant?: "default"|"success"|"warning"|"danger"|"info"|"gold"; children: React.ReactNode; className?: string; }
+interface BadgeProps { variant?: "default"|"success"|"warning"|"danger"|"info"|"gold"|"outline"; children: React.ReactNode; className?: string; }
 export function Badge({ variant = "default", children, className }: BadgeProps) {
   const variants = {
     default: "bg-brand-cloud text-brand-ebony/60 border border-brand-ebony/5",
@@ -149,6 +149,7 @@ export function Badge({ variant = "default", children, className }: BadgeProps) 
     danger:  "bg-red-50 text-red-700 border border-red-100",
     info:    "bg-blue-50 text-blue-700 border border-blue-100",
     gold:    "bg-gradient-to-r from-amber-400 to-amber-600 text-white shadow-sm font-black italic",
+    outline: "bg-transparent text-brand-ebony border border-brand-ebony/10",
   };
   return (
     <span className={cn("inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest leading-none", variants[variant], className)}>

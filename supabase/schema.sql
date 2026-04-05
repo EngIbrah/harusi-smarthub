@@ -377,3 +377,9 @@ SET raw_user_meta_data = raw_user_meta_data || '{"role": "admin"}'
 WHERE id = 'PASTE_YOUR_UUID_HERE';
 
 
+
+
+ALTER TABLE wedding_plans 
+ADD COLUMN IF NOT EXISTS ai_strategy_notes TEXT,
+ADD COLUMN IF NOT EXISTS market_comparison_json JSONB,
+ADD COLUMN IF NOT EXISTS priority_focus VARCHAR(50) DEFAULT 'balanced';
