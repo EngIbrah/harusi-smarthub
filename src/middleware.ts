@@ -9,12 +9,17 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return request.cookies.getAll(); },
-        setAll(cookiesToSet) {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        // ADDED TYPE DEFINITION HERE:
+        setAll(cookiesToSet: { name: string; value: string; options: any }[]) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = NextResponse.next({
+            request,
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -23,6 +28,7 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // Get user session
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
 
@@ -50,7 +56,13 @@ export async function middleware(request: NextRequest) {
     if (path.startsWith("/vendor") && role !== "vendor" && role !== "admin") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    if ((path.startsWith("/dashboard") || path.startsWith("/planner") || path.startsWith("/marketplace") || path.startsWith("/bookings")) && role === "vendor") {
+    if (
+      (path.startsWith("/dashboard") ||
+        path.startsWith("/planner") ||
+        path.startsWith("/marketplace") ||
+        path.startsWith("/bookings")) &&
+      role === "vendor"
+    ) {
       return NextResponse.redirect(new URL("/vendor/dashboard", request.url));
     }
   }
@@ -63,7 +75,7 @@ export async function middleware(request: NextRequest) {
       .eq("id", user.id)
       .single();
     const role = profile?.role;
-    if (role === "admin")  return NextResponse.redirect(new URL("/admin", request.url));
+    if (role === "admin") return NextResponse.redirect(new URL("/admin", request.url));
     if (role === "vendor") return NextResponse.redirect(new URL("/vendor/dashboard", request.url));
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
@@ -72,5 +84,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
